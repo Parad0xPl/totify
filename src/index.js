@@ -5,14 +5,9 @@ const path = require("path");
 const chalk = require("chalk");
 
 const socketPathCon = require("./utils/socketPath");
+const connectionHandler = require("./connectionHandler");
 
-let id = 0;
-
-const server = net.createServer(socket => {
-  id++;
-  console.log("Connected, id:", id);
-  socket.write("Test");
-});
+const server = net.createServer(connectionHandler);
 
 const socketPath = socketPathCon();
 
