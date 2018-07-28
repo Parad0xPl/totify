@@ -4,8 +4,10 @@ import type { Socket } from "net";
 
 const countAndSlice = require("./utils/countAndSlice");
 
+// All connections stored by id
 const Connections = {};
 
+// List of operations should be executed
 const secureOp = ["ping", "close"];
 
 class Connection {
@@ -50,11 +52,14 @@ class Connection {
 
   execute(op: string) {
     if (secureOp.includes(op)) {
+      // $FlowFixMe
       this[op]();
     } else {
       this.write("Unkown operator\n\r");
     }
   }
+
+  // Session`s Operations
 
   ping() {
     this.write("pong\n\r");
@@ -64,6 +69,8 @@ class Connection {
     this.write("Closing connection\n\r");
     this.socket.end();
   }
+
+  // Connection methods
 
   write(input: string | Buffer) {
     this.socket.write(input);

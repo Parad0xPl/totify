@@ -2,7 +2,13 @@
 
 let path = require("path");
 
-module.exports = (instanceName?: string): string => {
+/**
+ * Build path of socket
+ *
+ * @param {string} [instanceName] Instance`s name
+ * @returns {string}
+ */
+function socketPath(instanceName?: string): string {
   let socketPathArgs = ["/tmp"];
   if (process.platform == "win32") {
     socketPathArgs = ['\\\\?\\pipe'];
@@ -16,3 +22,5 @@ module.exports = (instanceName?: string): string => {
   const socketPath = path.join.apply(path, socketPathArgs);
   return socketPath;
 }
+
+module.exports = socketPath;
