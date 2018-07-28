@@ -22,6 +22,8 @@
     "nodemon": "^1.18.3"
   },
   "dependencies": {
-    "chalk": "^2.4.1"
+    "chalk": "^2.4.1",
+    "sequelize": "^4.38.0",
+    "sqlite3": "^4.0.2"
   }
 }

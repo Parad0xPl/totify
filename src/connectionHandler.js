@@ -3,18 +3,23 @@
 import type { Socket } from "net";
 
 const countAndSlice = require("./utils/countAndSlice");
+const Queue = require("./utils/Queue");
+const db = require("./db");
 
 // All connections stored by id
 const Connections = {};
 
 // List of operations should be executed
-const secureOp = ["ping", "close"];
+const secureOp = [
+  "register",
+  "ping",
+  "close"];
 
 class Connection {
   id: number;
   socket: Socket;
   buffer: string;
-  queue: string[];
+  queue: Queue<string>;
 
   constructor(id: number, socket: Socket) {
     console.log("New connection", id);
@@ -22,11 +27,11 @@ class Connection {
     this.id = id;
     this.socket = socket;
     this.buffer = "";
-    this.queue = [];
+    this.queue = new Queue();
 
     Connections[id] = this;
 
-    socket.on("data", data => {
+    socket.on("data", async data => {
       data = data.toString();
       this.buffer = this.buffer.concat(data);
       console.log("Buffer", this.buffer);
@@ -36,13 +41,12 @@ class Connection {
       } else {
         this.buffer = "";
       }
-      this.queue = this.queue.concat(arr);
+      this.queue.concat(arr);
 
       while (this.queue.length > 0) {
-        let op = this.queue.shift();
-        this.execute(op);
+        let op = this.queue.removeSync();
+        await this.execute(op);
       }
-
     })
 
     socket.on("end", () => {
@@ -50,10 +54,10 @@ class Connection {
     });
   }
 
-  execute(op: string) {
+  async execute(op: string) {
     if (secureOp.includes(op)) {
       // $FlowFixMe
-      this[op]();
+      await this[op]();
     } else {
       this.write("Unkown operator\n\r");
     }
@@ -61,12 +65,20 @@ class Connection {
 
   // Session`s Operations
 
+  async register() {
+    const name = await this.queue.remove();
+    let instance = await db.App.create({
+      name
+    });
+    this.write(`${instance.id};`);
+  }
+
   ping() {
-    this.write("pong\n\r");
+    this.write("pong;");
   }
 
   close() {
-    this.write("Closing connection\n\r");
+    this.write("Closing connection;");
     this.socket.end();
   }
 
