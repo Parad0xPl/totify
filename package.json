@@ -1,0 +1,27 @@
+{
+  "name": "totify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dst/index.js",
+  "scripts": {
+    "start": "node dst/index.js",
+    "startDev": "nodemon src/index.js",
+    "prebuild": "rm -rf dst",
+    "build": "babel -d dst src/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.77.0",
+    "nodemon": "^1.18.3"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1"
+  }
+}
