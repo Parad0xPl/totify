@@ -1,5 +1,6 @@
 dst
 *.sqlite
+authCode
 # Created by https://www.gitignore.io/api/node
 
 ### Node ###

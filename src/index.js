@@ -6,7 +6,8 @@ const chalk = require("chalk");
 
 const socketPathCon = require("./utils/socketPath");
 const connectionHandler = require("./connectionHandler");
-const db = require("./db");
+const init = require("./init");
+const prepareBot = require("./bot");
 
 const server = net.createServer(connectionHandler);
 
@@ -15,7 +16,10 @@ const socketPath = socketPathCon();
 //Main
 
 (async () => {
-  await db.sequelize.sync();
+
+  await init();
+
+  prepareBot();
 
   server.listen(path.resolve(socketPath), () => {
     console.log(`Server is listening on ${socketPath}`);
