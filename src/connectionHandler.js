@@ -70,7 +70,7 @@ class Connection {
     let instance = await db.App.create({
       name
     });
-    this.write(`${instance.id};`);
+    this.write(`${instance.id}&${instance.auth};`);
   }
 
   ping() {
