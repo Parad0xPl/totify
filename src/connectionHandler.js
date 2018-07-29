@@ -12,6 +12,7 @@ const Connections = {};
 // List of operations should be executed
 const secureOp = [
   "register",
+  "login",
   "ping",
   "close"];
 
@@ -20,6 +21,7 @@ class Connection {
   socket: Socket;
   buffer: string;
   queue: Queue<string>;
+  session: any;
 
   constructor(id: number, socket: Socket) {
     console.log("New connection", id);
@@ -71,6 +73,27 @@ class Connection {
       name
     });
     this.write(`${instance.id}&${instance.auth};`);
+  }
+
+  async login() {
+    if (typeof this.session !== "undefined") {
+      this.write("error:session is logged;");
+      return;
+    }
+    const auth = await this.queue.remove();
+    const user = await db.App.findOne({
+      where: {
+        auth
+      }
+    });
+    if (!user) {
+      this.write("error:auth unmatched;");
+      return;
+    }
+    this.session = {
+      user
+    };
+    this.write("info:loggedin;");
   }
 
   ping() {
