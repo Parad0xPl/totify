@@ -11,8 +11,7 @@ const App = sequelize.define("app", {
   auth: {
     type: Sequelize.STRING,
     defaultValue: "",
-    unique: true,
-    primaryKey: true
+    unique: true
   },
   activated: {
     type: Sequelize.BOOLEAN,

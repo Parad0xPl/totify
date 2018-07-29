@@ -1,6 +1,7 @@
 //@flow
 
 const auth = require("./auth");
+const app = require("./app");
 const telegraf = require("../telegraf");
 const commandParts = require('telegraf-command-parts');
 
@@ -10,6 +11,7 @@ function bot() {
 
   // Modules
   auth();
+  app();
 
   // Start
   telegraf.bot.startPolling();

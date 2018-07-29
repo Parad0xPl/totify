@@ -83,11 +83,12 @@ class Connection {
     const auth = await this.queue.remove();
     const user = await db.App.findOne({
       where: {
-        auth
+        auth,
+        activated: true
       }
     });
     if (!user) {
-      this.write("error:auth unmatched;");
+      this.write("error:auth unmatched or not activated;");
       return;
     }
     this.session = {
