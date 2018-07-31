@@ -49,7 +49,10 @@ class Connection {
 
       while (this.queue.length > 0) {
         let op = this.queue.removeSync();
-        await this.execute(op);
+        op = op.trim();
+        if (op.length > 0) {
+          await this.execute(op);
+        }
       }
     })
 
