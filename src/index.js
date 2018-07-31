@@ -35,6 +35,16 @@ const socketPath = socketPathCon();
     } else {
       console.log("Unexpected error, code:", err.code);
     }
-    process.exit();
+    server.close(() => {
+      process.exit();
+    })
   });
+
+  process.on("SIGINT", () => {
+    console.log("Closing server");
+    server.close(() => {
+      console.log("Server closed");
+      process.exit(0);
+    });
+  })
 })();
