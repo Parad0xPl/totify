@@ -5,6 +5,7 @@ import type { Socket } from "net";
 const countAndSlice = require("./utils/countAndSlice");
 const Queue = require("./utils/Queue");
 const db = require("./db");
+const telegraf = require("./telegraf");
 
 // All connections stored by id
 const Connections = {};
@@ -13,6 +14,7 @@ const Connections = {};
 const secureOp = [
   "register",
   "login",
+  "notify",
   "ping",
   "close"];
 
@@ -76,11 +78,11 @@ class Connection {
   }
 
   async login() {
+    const auth = await this.queue.remove();
     if (typeof this.session !== "undefined") {
       this.write("error:session is logged;");
       return;
     }
-    const auth = await this.queue.remove();
     const user = await db.App.findOne({
       where: {
         auth,
@@ -95,6 +97,16 @@ class Connection {
       user
     };
     this.write("info:loggedin;");
+  }
+
+  async notify() {
+    const message = await this.queue.remove();
+    if (typeof this.session === "undefined") {
+      this.write("error:need to be logged;");
+      return;
+    }
+    let messageFormatted = `[${this.session.user.name}] - ${message}`;
+    telegraf.send(messageFormatted);
   }
 
   ping() {
