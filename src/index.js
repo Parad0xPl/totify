@@ -1,5 +1,7 @@
 //@flow
 
+require("dotenv").config();
+
 const net = require("net");
 const path = require("path");
 const chalk = require("chalk");
