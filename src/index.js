@@ -42,11 +42,14 @@ const socketPath = socketPathCon();
     })
   });
 
-  process.on("SIGINT", () => {
+  const sigHandler = () => {
     console.log("Closing server");
     server.close(() => {
       console.log("Server closed");
       process.exit(0);
     });
-  })
+  };
+
+  process.on("SIGINT", sigHandler);
+  process.on("SIGTERM", sigHandler);
 })();
