@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "dst/index.js",
+  "bin": "dst/index.js",
   "scripts": {
     "start": "node dst/index.js",
     "startDev": "nodemon src/index.js",
@@ -25,6 +26,7 @@
     "chalk": "^2.4.1",
     "dotenv": "^6.0.0",
     "moment": "^2.22.2",
+    "pkg": "^4.3.4",
     "randomatic": "^3.0.0",
     "sequelize": "^4.38.0",
     "sqlite3": "^4.0.2",

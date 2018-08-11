@@ -1,9 +1,12 @@
 //@flow
 
-require("dotenv").config();
+const path = require("path");
+
+require("dotenv").config({
+  path: path.join(process.cwd(), ".env")
+});
 
 const net = require("net");
-const path = require("path");
 const chalk = require("chalk");
 
 const socketPathCon = require("./utils/socketPath");

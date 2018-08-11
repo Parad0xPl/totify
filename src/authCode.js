@@ -2,8 +2,9 @@
 
 const rand = require("randomatic");
 const fs = require("fs");
+const path = require("path");
 
-const fn = "authCode";
+const fn = path.join(process.cwd(), "authCode");
 class Auth {
 
   code: string;
