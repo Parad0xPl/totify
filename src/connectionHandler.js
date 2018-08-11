@@ -6,6 +6,7 @@ const countAndSlice = require("./utils/countAndSlice");
 const Queue = require("./utils/Queue");
 const db = require("./db");
 const telegraf = require("./telegraf");
+const ie = require("./utils/internalError")("connHand");
 
 // All connections stored by id
 const Connections = {};
@@ -24,6 +25,7 @@ class Connection {
   buffer: string;
   queue: Queue<string>;
   session: any;
+  ended: boolean;
 
   constructor(id: number, socket: Socket) {
     console.log("New connection", id);
@@ -32,31 +34,56 @@ class Connection {
     this.socket = socket;
     this.buffer = "";
     this.queue = new Queue();
+    this.ended = false;
 
     Connections[id] = this;
 
     socket.on("data", async data => {
-      data = data.toString();
-      this.buffer = this.buffer.concat(data);
-      console.log("Buffer", this.buffer);
-      let [arr, count] = countAndSlice(this.buffer);
-      if (arr.length > count) {
-        this.buffer = arr.pop();
-      } else {
-        this.buffer = "";
-      }
-      this.queue.concat(arr);
-
-      while (this.queue.length > 0) {
-        let op = this.queue.removeSync();
-        op = op.trim();
-        if (op.length > 0) {
-          await this.execute(op);
+      try {
+        data = data.toString();
+        this.buffer = this.buffer.concat(data);
+        console.log("Buffer", this.buffer);
+        let [arr, count] = countAndSlice(this.buffer);
+        if (arr.length > count) {
+          this.buffer = arr.pop();
+        } else {
+          this.buffer = "";
         }
+        this.queue.concat(arr);
+
+        while (this.queue.length > 0) {
+          let op = this.queue.removeSync();
+          op = op.trim();
+          if (op.length > 0) {
+            try {
+              await this.execute(op);
+            } catch (e) {
+              console.log(`Error while executing op: ${op}`);
+              console.log(`ConID: ${this.id}`);
+              console.log(e);
+            }
+          }
+        }
+      } catch (e) {
+        ie(1);
       }
     })
 
-    socket.on("end", () => {
+    socket.on("error", (err) => {
+      if (err.code === 'EPIPE') {
+        console.log("Socket used after being closed. (Probably by client)");
+        socket.end();
+        this.end();
+        return;
+      }
+      console.log("Connection error");
+      console.log(`ConID: ${this.id}`);
+      console.log(err);
+    });
+
+
+    socket.once("end", () => {
+      this.ended = true;
       this.end();
     });
   }
@@ -68,6 +95,7 @@ class Connection {
     } else {
       this.write("Unkown operator\n\r");
     }
+
   }
 
   // Session`s Operations
@@ -124,7 +152,9 @@ class Connection {
   // Connection methods
 
   write(input: string | Buffer) {
-    this.socket.write(input);
+    if (!this.socket.destroyed && !this.ended) {
+      this.socket.write(input);
+    }
   }
 
   end() {

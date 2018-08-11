@@ -55,4 +55,7 @@ const socketPath = socketPathCon();
 
   process.on("SIGINT", sigHandler);
   process.on("SIGTERM", sigHandler);
-})();
+})().catch(err => {
+  console.log("Main thread error:");
+  console.log(err);
+});

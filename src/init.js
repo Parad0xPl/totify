@@ -7,6 +7,7 @@ async function init() {
     await db.sequelize.sync();
     await bot.init();
   } catch (e) {
+    console.log("Error while initialiazing:");
     console.log(e.message);
     process.exit(-1);
   }
