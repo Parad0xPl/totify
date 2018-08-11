@@ -2,6 +2,7 @@
 
 const moment = require("moment");
 
+const cmdRegistry = require("../commandRegistry");
 const telegraf = require("../telegraf");
 const Extra = require('telegraf/extra');
 const Markup = require('telegraf/markup');
@@ -28,7 +29,7 @@ function app() {
     ctx.reply(`${app.name} deleted`);
   });
 
-  telegraf.bot.command("pendingApps", async (ctx) => {
+  cmdRegistry.register("pendingApps", async (ctx) => {
     let pendingApps = await db.App.findAll({
       where: {
         activated: false
@@ -51,6 +52,23 @@ function app() {
       .oneTime()
       .resize()
       .extra());
+  });
+
+  cmdRegistry.register("registerApp", async (ctx) => {
+    const args: string = await ctx.state.command.args;
+    if (args.length > 25) {
+      ctx.reply("Name to long!");
+      return;
+    }
+    const appName = args;
+    const instance = await db.App.create({
+      name: appName,
+      activated: true
+    });
+    ctx.reply(`App registered\n` +
+      `Name: ${instance.name}\n` +
+      `Auth: ${instance.auth}`);
+    return;
   });
 }
 module.exports = app;

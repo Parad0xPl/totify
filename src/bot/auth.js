@@ -2,6 +2,7 @@
 
 const moment = require("moment");
 
+const cmdRegistry = require("../commandRegistry");
 const telegraf = require("../telegraf");
 const db = require("../db");
 const authCode = require("../authCode");
@@ -26,7 +27,7 @@ function auth() {
     next();
   });
 
-  telegraf.bot.command("auth", async (ctx, next) => {
+  cmdRegistry.register("auth", async (ctx, next) => {
     if (ctx.user && ctx.user.activated == true) {
       ctx.reply("Already authorised");
       return
@@ -66,7 +67,7 @@ function auth() {
     }
   })
 
-  telegraf.bot.command("getAuthCode", (ctx) => {
+  cmdRegistry.register("getAuthCode", (ctx) => {
     ctx.reply(`Actual authentication code: ${authCode.get()}`);
   });
 }
