@@ -87,5 +87,28 @@ function app() {
     }
   });
 
+  cmdRegistry.register("apps", async (ctx) => {
+    try {
+      let apps = await db.App.findAndCountAll({
+        limit: 5
+      });
+      apps = apps.rows;
+      if (apps <= 0) {
+        ctx.reply("No apps to show");
+        return;
+      }
+      let msg = apps.map(el => {
+        return {
+          i: el.id,
+          n: el.name,
+          a: (el.activated ? "Activated" : "Not activated")
+        }
+      }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
+      return ctx.reply(msg);
+    } catch (e) {
+      ie(5, e);
+    }
+  });
+
 }
 module.exports = app;
