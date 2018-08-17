@@ -65,7 +65,7 @@ class Connection {
           }
         }
       } catch (e) {
-        ie(1);
+        ie(1, e);
       }
     })
 

@@ -23,7 +23,7 @@ function app() {
       })
       ctx.reply(`${app.name} accepted`);
     } catch (e) {
-      ie(1);
+      ie(1, e);
     }
   });
 
@@ -34,7 +34,7 @@ function app() {
       await app.destroy();
       ctx.reply(`${app.name} deleted`);
     } catch (e) {
-      ie(2);
+      ie(2, e);
     }
   });
 
@@ -56,14 +56,13 @@ function app() {
           `❌[${el.id}] ${el.name}`
         ]
       });
-      console.log(apps);
       return ctx.reply('Activate app', Markup
         .keyboard(apps)
         .oneTime()
         .resize()
         .extra());
     } catch (e) {
-      ie(3);
+      ie(3, e);
     }
   });
 
@@ -84,8 +83,9 @@ function app() {
         `Auth: ${instance.auth}`);
       return;
     } catch (e) {
-      ie(4);
+      ie(4, e);
     }
   });
+
 }
 module.exports = app;

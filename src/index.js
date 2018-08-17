@@ -8,6 +8,7 @@ require("dotenv").config({
 
 const net = require("net");
 const chalk = require("chalk");
+const debug = require("debug")("totify:main");
 
 const socketPathCon = require("./utils/socketPath");
 const connectionHandler = require("./connectionHandler");
@@ -22,10 +23,14 @@ const socketPath = socketPathCon();
 
 (async () => {
 
+  debug("Starting awaited init");
   await init();
+  debug("Initializing done")
 
+  debug("Preparing bot");
   prepareBot();
 
+  debug("Starting server")
   server.listen(path.resolve(socketPath), () => {
     console.log(`Server is listening on ${socketPath}`);
   });
@@ -39,6 +44,7 @@ const socketPath = socketPathCon();
       ));
     } else {
       console.log("Unexpected error, code:", err.code);
+      debug(err);
     }
     server.close(() => {
       process.exit();
@@ -57,5 +63,5 @@ const socketPath = socketPathCon();
   process.on("SIGTERM", sigHandler);
 })().catch(err => {
   console.log("Main thread error:");
-  console.log(err);
+  debug(err);
 });

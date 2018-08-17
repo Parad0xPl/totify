@@ -28,7 +28,7 @@ function auth() {
       }
       next();
     } catch (e) {
-      ie(1);
+      ie(1, e);
     }
   });
 
@@ -64,7 +64,7 @@ function auth() {
         ctx.reply("Wrong authentication code. Will be banned for 24H")
       }
     } catch (e) {
-      ie(2);
+      ie(2, e);
     }
   });
 
@@ -76,7 +76,7 @@ function auth() {
         ctx.reply("You need to be authorised");
       }
     } catch (e) {
-      ie(3);
+      ie(3, e);
     }
   })
 
@@ -84,7 +84,7 @@ function auth() {
     try {
       ctx.reply(`Actual authentication code: ${authCode.get()}`);
     } catch (e) {
-      ie(4);
+      ie(4, e);
     }
   });
 }
