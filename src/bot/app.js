@@ -9,6 +9,7 @@ const Extra = require('telegraf/extra');
 const Markup = require('telegraf/markup');
 const db = require("../db");
 const ie = require("../utils/internalError")("bot/app");
+const parseId = require("../utils/parseId");
 
 async function fetchPendingApps() {
   let pendingApps = await db.App.findAll({
@@ -102,9 +103,13 @@ function app() {
 
   cmdRegistry.register("apps", async (ctx) => {
     try {
+      const page = parseId(ctx.state.command.splitArgs[0]) - 1;
       let apps = await db.App.findAndCountAll({
-        limit: 5
+        limit: 5,
+        offset: 5 * page
       });
+      const count = apps.count;
+      const maxPage = Math.floor(count / 5);
       apps = apps.rows;
       if (apps <= 0) {
         ctx.reply("No apps to show");
@@ -117,9 +122,50 @@ function app() {
           a: (el.activated ? "Activated" : "Not activated")
         }
       }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
-      return ctx.reply(msg);
+      const keyboard = [];
+      if (page > 0) {
+        keyboard.push(Markup.callbackButton(`<< Before`, `apps ${page - 1}`));
+      }
+      if (page < maxPage) {
+        keyboard.push(Markup.callbackButton(`Next >>`, `apps ${page + 1}`));
+      }
+      return ctx.reply(msg, Markup.inlineKeyboard(keyboard).extra());
     } catch (e) {
       ie(5, e);
+    }
+  });
+
+  telegraf.bot.action(/^apps (\d+)$/, async (ctx) => {
+    try {
+      const page = parseInt(ctx.match[1]);
+      let apps = await db.App.findAndCountAll({
+        limit: 5,
+        offset: 5 * page
+      });
+      const count = apps.count;
+      const maxPage = Math.floor(count / 5);
+      apps = apps.rows;
+      if (apps <= 0) {
+        await ctx.editMessageText("No apps to show");
+        return;
+      }
+      let msg = apps.map(el => {
+        return {
+          i: el.id,
+          n: el.name,
+          a: (el.activated ? "Activated" : "Not activated")
+        }
+      }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
+      const keyboard = [];
+      if (page > 0) {
+        keyboard.push(Markup.callbackButton(`<< Before`, `apps ${page - 1}`));
+      }
+      if (page < maxPage) {
+        keyboard.push(Markup.callbackButton(`Next >>`, `apps ${page + 1}`));
+      }
+      await ctx.editMessageText(msg, Markup.inlineKeyboard(keyboard).extra());
+    } catch (e) {
+      ie(6, e);
     }
   });
 
