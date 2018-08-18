@@ -1,6 +1,7 @@
 //@flow
 
 const moment = require("moment");
+const debug = require("debug")("totify:bot/app");
 
 const cmdRegistry = require("../commandRegistry");
 const telegraf = require("../telegraf");
@@ -9,30 +10,57 @@ const Markup = require('telegraf/markup');
 const db = require("../db");
 const ie = require("../utils/internalError")("bot/app");
 
+async function fetchPendingApps() {
+  let pendingApps = await db.App.findAll({
+    where: {
+      activated: false
+    },
+    limit: 5
+  });
+  let apps = pendingApps.map(el => {
+    return [
+      Markup.callbackButton(`✔️[${el.id}] ${el.name}`, `activate ${el.id}`),
+      Markup.callbackButton(`❌[${el.id}] ${el.name}`, `deactivate ${el.id}`)
+    ]
+  });
+  return apps;
+}
+
+async function getPAppsKeyboard(apps: ?any) {
+  if (!apps) {
+    apps = await fetchPendingApps();
+  }
+  return Markup.inlineKeyboard(apps)
+    .resize()
+    .extra();
+}
+
 function app() {
   if (telegraf.bot == null) {
     throw new Error("Bot uninitialized");
   }
 
-  telegraf.bot.hears(/✔️\[(\d+)\] [\w ]+/, async (ctx) => {
+  telegraf.bot.action(/^activate (\d+)$/, async (ctx) => {
     try {
+      debug("Activating app", ctx.match[1]);
       let id = ctx.match[1];
       let app = await db.App.findById(id);
       await app.update({
         activated: true
       })
-      ctx.reply(`${app.name} accepted`);
+      ctx.editMessageText(`[${app.name}] Activated`, await getPAppsKeyboard());
     } catch (e) {
       ie(1, e);
     }
   });
 
-  telegraf.bot.hears(/❌\[(\d+)\] [\w ]+/, async (ctx) => {
+  telegraf.bot.action(/^deactivate (\d+)$/, async (ctx) => {
     try {
+      debug("Deactivating app", ctx.match[1]);
       let id = ctx.match[1];
       let app = await db.App.findById(id);
       await app.destroy();
-      ctx.reply(`${app.name} deleted`);
+      await ctx.editMessageText(`[${app.name}] Removed`, await getPAppsKeyboard());
     } catch (e) {
       ie(2, e);
     }
@@ -40,27 +68,12 @@ function app() {
 
   cmdRegistry.register("pendingApps", async (ctx) => {
     try {
-      let pendingApps = await db.App.findAll({
-        where: {
-          activated: false
-        },
-        limit: 5
-      });
+      let pendingApps = await fetchPendingApps();
       if (pendingApps <= 0) {
         ctx.reply("No application is waiting for activation");
         return;
       }
-      let apps = pendingApps.map(el => {
-        return [
-          `✔️[${el.id}] ${el.name}`,
-          `❌[${el.id}] ${el.name}`
-        ]
-      });
-      return ctx.reply('Activate app', Markup
-        .keyboard(apps)
-        .oneTime()
-        .resize()
-        .extra());
+      return ctx.reply('Apps to activate', await getPAppsKeyboard(pendingApps));
     } catch (e) {
       ie(3, e);
     }
