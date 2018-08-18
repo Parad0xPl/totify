@@ -101,35 +101,40 @@ function app() {
     }
   });
 
+  async function printAppsList(page, ctx) {
+    let apps = await db.App.findAndCountAll({
+      limit: 5,
+      offset: 5 * page
+    });
+    const count = apps.count;
+    const maxPage = Math.floor(count / 5);
+    apps = apps.rows;
+    if (apps <= 0) {
+      ctx.reply("No apps to show");
+      return;
+    }
+    let msg = apps.map(el => {
+      return {
+        i: el.id,
+        n: el.name,
+        a: (el.activated ? "Activated" : "Not activated")
+      }
+    }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
+    const keyboard = [];
+    if (page > 0) {
+      keyboard.push(Markup.callbackButton(`<< Before`, `apps ${page - 1}`));
+    }
+    if (page < maxPage) {
+      keyboard.push(Markup.callbackButton(`Next >>`, `apps ${page + 1}`));
+    }
+    return [msg, Markup.inlineKeyboard(keyboard).extra()];
+  }
+
   cmdRegistry.register("apps", async (ctx) => {
     try {
       const page = parseId(ctx.state.command.splitArgs[0]) - 1;
-      let apps = await db.App.findAndCountAll({
-        limit: 5,
-        offset: 5 * page
-      });
-      const count = apps.count;
-      const maxPage = Math.floor(count / 5);
-      apps = apps.rows;
-      if (apps <= 0) {
-        ctx.reply("No apps to show");
-        return;
-      }
-      let msg = apps.map(el => {
-        return {
-          i: el.id,
-          n: el.name,
-          a: (el.activated ? "Activated" : "Not activated")
-        }
-      }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
-      const keyboard = [];
-      if (page > 0) {
-        keyboard.push(Markup.callbackButton(`<< Before`, `apps ${page - 1}`));
-      }
-      if (page < maxPage) {
-        keyboard.push(Markup.callbackButton(`Next >>`, `apps ${page + 1}`));
-      }
-      return ctx.reply(msg, Markup.inlineKeyboard(keyboard).extra());
+      let args = await printAppsList(page, ctx);
+      return ctx.reply.apply(ctx, args);
     } catch (e) {
       ie(5, e);
     }
@@ -138,32 +143,8 @@ function app() {
   telegraf.bot.action(/^apps (\d+)$/, async (ctx) => {
     try {
       const page = parseInt(ctx.match[1]);
-      let apps = await db.App.findAndCountAll({
-        limit: 5,
-        offset: 5 * page
-      });
-      const count = apps.count;
-      const maxPage = Math.floor(count / 5);
-      apps = apps.rows;
-      if (apps <= 0) {
-        await ctx.editMessageText("No apps to show");
-        return;
-      }
-      let msg = apps.map(el => {
-        return {
-          i: el.id,
-          n: el.name,
-          a: (el.activated ? "Activated" : "Not activated")
-        }
-      }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
-      const keyboard = [];
-      if (page > 0) {
-        keyboard.push(Markup.callbackButton(`<< Before`, `apps ${page - 1}`));
-      }
-      if (page < maxPage) {
-        keyboard.push(Markup.callbackButton(`Next >>`, `apps ${page + 1}`));
-      }
-      await ctx.editMessageText(msg, Markup.inlineKeyboard(keyboard).extra());
+      let args = await printAppsList(page, ctx);
+      return ctx.editMessageText.apply(ctx, args);
     } catch (e) {
       ie(6, e);
     }
