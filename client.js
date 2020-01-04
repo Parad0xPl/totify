@@ -1,7 +1,4 @@
-//@flow
-
-let net = require("net");
-let path = require("path");
+const net = require("net");
 
 let socketPath = require("./src/utils/socketPath");
 

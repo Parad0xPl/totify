@@ -1,10 +1,9 @@
-//@flow
+import Telegraf, {ContextMessageUpdate} from "telegraf";
+import db from "./db";
 
-const Telegraf = require("telegraf");
-const db = require("./db");
-
-const returned: {
-  [string]: any
+const telegraf: {
+  [propname: string]: any,
+  bot?: Telegraf<ContextMessageUpdate>
 } = {
   async chats(): Promise<number[]> {
     let a = await db.User.findAll({
@@ -13,17 +12,20 @@ const returned: {
         permanentBan: false
       }
     });
-    a = a.map(el => el.userTelegramId).map(el => parseInt(el));
-    return a;
+    let ids = a.map(el => el.userTelegramId);
+    return ids;
   },
-  async send(message: string) {
+  async send(message: string): Promise<void> {
+    if(!this.bot){
+      throw new Error("Can't send when telegraf is not initialized");
+    }
     let chats = await this.chats();
     for (let id of chats) {
       await this.bot.telegram.sendMessage(id, message);
     }
   },
   bot: undefined,
-  async init() {
+  async init(): Promise<void> {
     if (typeof process.env.TELEGRAM_TOKEN === "undefined") {
       throw new Error("Telegram token not found");
     }
@@ -32,4 +34,4 @@ const returned: {
   }
 };
 
-module.exports = returned;
+export default telegraf;

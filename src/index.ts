@@ -1,23 +1,22 @@
-//@flow
-
-const path = require("path");
+import path from "path";
 
 require("dotenv").config({
   path: path.join(process.cwd(), ".env")
 });
 
-const net = require("net");
-const chalk = require("chalk");
-const debug = require("debug")("totify:main");
+import net from "net";
+import chalk from "chalk";
+import _debug from "debug";
+const debug = _debug("totify:main");
 
-const socketPathCon = require("./utils/socketPath");
-const connectionHandler = require("./connectionHandler");
-const init = require("./init");
-const prepareBot = require("./bot");
+import socketPathCon from "./utils/socketPath";
+import connectionHandler from "./connectionHandler";
+import init from "./init";
+import prepareBot from "./bot";
 
 const server = net.createServer(connectionHandler);
 
-const socketPath = socketPathCon();
+const socketPath = socketPathCon(process.env.TOTIFY_INSTANCENAME);
 
 //Main
 
@@ -35,7 +34,7 @@ const socketPath = socketPathCon();
     console.log(`Server is listening on ${socketPath}`);
   });
 
-  server.on("error", err => {
+  server.on("error", (err: SocketError)=> {
     if (err.code == "EADDRINUSE") {
       console.log(chalk.red(
         `Totify stream address is already in use. ` +

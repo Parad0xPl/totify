@@ -1,8 +1,6 @@
-//@flow
+import ee from "events";
 
-const ee = require("events");
-
-module.exports = class Queue<T> extends ee {
+class Queue<T> extends ee {
   queue: Array<T>;
 
   constructor() {
@@ -32,7 +30,7 @@ module.exports = class Queue<T> extends ee {
     });
   }
 
-  removeSync(): T {
+  removeSync(): T | undefined {
     this.emit("remove");
     return this.queue.shift();
   }
@@ -44,3 +42,5 @@ module.exports = class Queue<T> extends ee {
     }
   }
 }
+
+export default Queue;

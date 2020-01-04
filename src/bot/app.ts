@@ -1,17 +1,17 @@
-//@flow
+import moment from "moment";
+import _debug from "debug";
+import {Markup, CallbackButton} from "telegraf";
+const debug = _debug("totify:bot/app");
 
-const moment = require("moment");
-const debug = require("debug")("totify:bot/app");
+import cmdRegistry from "../commandRegistry";
+import telegraf from "../telegraf";
+import db from "../db";
+import _ie from "../utils/internalError";
+const ie = _ie("bot/app");
+import parseId from "../utils/parseId";
+import { Context } from "./auth";
 
-const cmdRegistry = require("../commandRegistry");
-const telegraf = require("../telegraf");
-const Extra = require('telegraf/extra');
-const Markup = require('telegraf/markup');
-const db = require("../db");
-const ie = require("../utils/internalError")("bot/app");
-const parseId = require("../utils/parseId");
-
-async function fetchPendingApps() {
+async function fetchPendingApps(): Promise<CallbackButton[][]> {
   let pendingApps = await db.App.findAll({
     where: {
       activated: false
@@ -27,7 +27,7 @@ async function fetchPendingApps() {
   return apps;
 }
 
-async function getPAppsKeyboard(apps: ?any) {
+async function getPAppsKeyboard(apps?: any): Promise<object> {
   if (!apps) {
     apps = await fetchPendingApps();
   }
@@ -43,9 +43,15 @@ function app() {
 
   telegraf.bot.action(/^activate (\d+)$/, async (ctx) => {
     try {
+      if(!ctx.match){
+        throw new Error("There is no match attribute");
+      }
       debug("Activating app", ctx.match[1]);
       let id = ctx.match[1];
-      let app = await db.App.findById(id);
+      let app = await db.App.findByPk(id);
+      if(app == null){
+        throw new Error(`There is no app with id equeal ${id}`);
+      }
       await app.update({
         activated: true
       })
@@ -57,9 +63,15 @@ function app() {
 
   telegraf.bot.action(/^deactivate (\d+)$/, async (ctx) => {
     try {
+      if(!ctx.match){
+        throw new Error("There is no match attribute");
+      }
       debug("Deactivating app", ctx.match[1]);
       let id = ctx.match[1];
-      let app = await db.App.findById(id);
+      let app = await db.App.findByPk(id);
+      if(app == null){
+        throw new Error(`There is no app with id equeal ${id}`);
+      }
       await app.destroy();
       await ctx.editMessageText(`[${app.name}] Removed`, await getPAppsKeyboard());
     } catch (e) {
@@ -70,7 +82,7 @@ function app() {
   cmdRegistry.register("pendingApps", async (ctx) => {
     try {
       let pendingApps = await fetchPendingApps();
-      if (pendingApps <= 0) {
+      if (pendingApps.length <= 0) {
         ctx.reply("No application is waiting for activation");
         return;
       }
@@ -80,8 +92,11 @@ function app() {
     }
   });
 
-  cmdRegistry.register("registerApp", async (ctx) => {
+  cmdRegistry.register("registerApp", async (ctx: Context) => {
     try {
+      if(!ctx.state){
+        throw new Error("There is no state attribute");
+      }
       const args: string = await ctx.state.command.args;
       if (args.length > 25) {
         ctx.reply("Name to long!");
@@ -101,19 +116,18 @@ function app() {
     }
   });
 
-  async function printAppsList(page, ctx) {
+  async function printAppsList(page: number, ctx: Context): Promise<[string, object]> {
     let apps = await db.App.findAndCountAll({
       limit: 5,
       offset: 5 * page
     });
     const count = apps.count;
     const maxPage = Math.floor(count / 5);
-    apps = apps.rows;
-    if (apps <= 0) {
+    if (apps.rows.length <= 0) {
       ctx.reply("No apps to show");
-      return;
+      throw new Error("No apps to show");
     }
-    let msg = apps.map(el => {
+    let msg = apps.rows.map(el => {
       return {
         i: el.id,
         n: el.name,
@@ -130,8 +144,11 @@ function app() {
     return [msg, Markup.inlineKeyboard(keyboard).extra()];
   }
 
-  cmdRegistry.register("apps", async (ctx) => {
+  cmdRegistry.register("apps", async (ctx: Context) => {
     try {
+      if(!ctx.state){
+        throw new Error("There is no state attribute");
+      }
       const page = parseId(ctx.state.command.splitArgs[0]) - 1;
       let args = await printAppsList(page, ctx);
       return ctx.reply.apply(ctx, args);
@@ -142,8 +159,14 @@ function app() {
 
   telegraf.bot.action(/^apps (\d+)$/, async (ctx) => {
     try {
+      if(!ctx.match){
+        throw new Error("There is no match attribute");
+      }
       const page = parseInt(ctx.match[1]);
       let args = await printAppsList(page, ctx);
+      if(args == undefined){
+        throw new Error("There is no app on list");
+      }
       return ctx.editMessageText.apply(ctx, args);
     } catch (e) {
       ie(6, e);
@@ -151,4 +174,6 @@ function app() {
   });
 
 }
-module.exports = app;
+
+
+export default app;

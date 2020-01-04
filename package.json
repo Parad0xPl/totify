@@ -7,31 +7,32 @@
   "scripts": {
     "start": "node dst/index.js",
     "startDev": "nodemon src/index.js",
-    "prebuild": "rm -rf dst",
-    "build": "babel -d dst src/",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-flow": "^6.23.0",
-    "flow-bin": "^0.77.0",
-    "nodemon": "^1.18.3"
+    "@types/bluebird": "^3.5.29",
+    "@types/chalk": "^2.2.0",
+    "@types/debug": "^4.1.5",
+    "@types/node": "^13.1.2",
+    "@types/sequelize": "^4.28.8",
+    "@types/validator": "^12.0.1",
+    "typescript": "^3.7.4",
+    "nodemon": "^2.0.2",
+    "pkg": "^4.4.2"
   },
   "dependencies": {
-    "chalk": "^2.4.1",
-    "debug": "^3.1.0",
-    "dotenv": "^6.0.0",
-    "moment": "^2.22.2",
-    "pkg": "^4.3.4",
-    "randomatic": "^3.0.0",
-    "sequelize": "^4.38.0",
-    "sqlite3": "^4.0.2",
-    "telegraf": "^3.22.1",
+    "chalk": "^3.0.0",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "moment": "^2.24.0",
+    "randomatic": "^3.1.1",
+    "sequelize": "^5.21.3",
+    "sqlite3": "^4.1.1",
+    "telegraf": "^3.35.0",
     "telegraf-command-parts": "^1.0.3"
   }
 }

@@ -1,16 +1,8 @@
-# Flow project template
-
-Simple template to save some time
+# Totify
 
 ## Dev tools
 
-* Flow
-* Babel
-  * presets:
-    * env (target: node 8.10)
-    * flow
-  * plugin:
-    * rest spread
+* Typescript
 * Nodemon
 
 ## Scripts
@@ -27,14 +19,8 @@ node src/index.js
 nodemon src/index.js
 ```
 
-### prebuild
-
-```
-rm -rf dst
-```
-
 ### build
 
 ```
-babel -d dst src/
+tsc
 ```

@@ -1,6 +1,4 @@
-//@flow
-
-let path = require("path");
+import path from "path";
 
 /**
  * Build path of socket
@@ -23,4 +21,4 @@ function socketPath(instanceName?: string): string {
   return socketPath;
 }
 
-module.exports = socketPath;
+export default socketPath;

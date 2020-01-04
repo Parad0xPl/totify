@@ -1,20 +1,33 @@
-//@flow
+import cmdRegistry from "../commandRegistry";
+import telegraf from "../telegraf";
+import db from "../db";
+import authCode from "../authCode";
+import _ie from "../utils/internalError";
+const ie = _ie("bot/auth");
 
-const moment = require("moment");
+import {ContextMessageUpdate} from "telegraf";
+import User from "../db/User";
 
-const cmdRegistry = require("../commandRegistry");
-const telegraf = require("../telegraf");
-const db = require("../db");
-const authCode = require("../authCode");
-const ie = require("../utils/internalError")("bot/auth");
+export interface Context extends ContextMessageUpdate{
+    user?: User | null
+    state?: {
+      command: ParsedCommand
+    }
+}
 
-function auth() {
+function auth(): void {
   if (telegraf.bot == null) {
     throw new Error("Bot uninitialized");
   }
 
-  telegraf.bot.use(async (ctx, next) => {
+  telegraf.bot.use(async (ctx: Context, next) => {
     try {
+      if (!ctx.from) {
+        throw new Error("Can't handle anonymous message");
+      }
+      if (!next) {
+        throw new Error("No callback");
+      }
       ctx.user = await db.User.findOne({
         where: {
           userTelegramId: ctx.from.id
@@ -22,7 +35,8 @@ function auth() {
       });
 
       if (!!ctx.user) {
-        if (ctx.user.permanentBan || ctx.user.activated === false && moment().diff(ctx.user.updatedAt) < moment.duration(1, 'days')) {
+        // Czemu tu było jakieś sprawdzenie kiedy ostatnio był aktualizowany profil :shrug:
+        if (ctx.user.permanentBan || ctx.user.activated === false) {
           return;
         }
       }
@@ -32,8 +46,11 @@ function auth() {
     }
   });
 
-  cmdRegistry.register("auth", async (ctx, next) => {
+  cmdRegistry.register("auth", async (ctx: Context, next) => {
     try {
+      if (!ctx.from || !ctx.state) {
+        throw new Error("There is no from attribute");
+      }
       if (ctx.user && ctx.user.activated == true) {
         ctx.reply("Already authorised");
         return
@@ -68,9 +85,9 @@ function auth() {
     }
   });
 
-  telegraf.bot.use((ctx, next) => {
+  telegraf.bot.use((ctx: Context, next) => {
     try {
-      if (ctx.user) {
+      if (ctx.user && next) {
         next()
       } else {
         ctx.reply("You need to be authorised");
@@ -88,4 +105,4 @@ function auth() {
     }
   });
 }
-module.exports = auth;
+export default auth;

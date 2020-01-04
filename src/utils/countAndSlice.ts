@@ -1,5 +1,3 @@
-//@flow
-
 /**
  * Split string to array by separator and count occurance of it`s
  *
@@ -30,4 +28,4 @@ function countAndSlice(input: string, separator: string = ";", escapeCharacter: 
   return [arr, counter];
 }
 
-module.exports = countAndSlice;
+export default countAndSlice;

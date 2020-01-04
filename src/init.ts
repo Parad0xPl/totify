@@ -1,8 +1,7 @@
-//@flow
-const db = require("./db");
-const bot = require("./telegraf");
+import db from "./db";
+import bot from "./telegraf";
 
-async function init() {
+async function init(): Promise<void> {
   try {
     await db.sequelize.sync();
     await bot.init();
@@ -12,4 +11,4 @@ async function init() {
     process.exit(-1);
   }
 }
-module.exports = init;
+export default init;

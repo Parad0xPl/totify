@@ -1,8 +1,6 @@
-//@flow
-
-const rand = require("randomatic");
-const fs = require("fs");
-const path = require("path");
+import rand from "randomatic";
+import fs from "fs";
+import path from "path";
 
 const fn = path.join(process.cwd(), "authCode");
 class Auth {
@@ -10,6 +8,7 @@ class Auth {
   code: string;
 
   constructor() {
+    this.code = "";
     if (fs.existsSync(fn)) {
       this.code = fs.readFileSync(fn, "utf8");
     } else {
@@ -35,4 +34,4 @@ class Auth {
 
 }
 
-module.exports = new Auth();
+export default new Auth();

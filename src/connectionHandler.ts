@@ -1,17 +1,23 @@
-//@flow
+import { Socket } from "net";
 
-import type { Socket } from "net";
-
-const countAndSlice = require("./utils/countAndSlice");
-const Queue = require("./utils/Queue");
-const db = require("./db");
-const telegraf = require("./telegraf");
-const ie = require("./utils/internalError")("connHand");
+import countAndSlice from "./utils/countAndSlice" ;
+import Queue from "./utils/Queue" ;
+import db from "./db" ;
+import telegraf from "./telegraf" ;
+import _ie from "./utils/internalError";
+const ie = _ie("connHand");
 
 // All connections stored by id
-const Connections = {};
+const Connections:{
+  [id: number]: Connection
+}= {};
 
 // List of operations should be executed
+
+type secureOp = "register" | "login" |
+  "notify" | "ping" |
+  "close";
+
 const secureOp = [
   "register",
   "login",
@@ -26,7 +32,6 @@ class Connection {
   queue: Queue<string>;
   session: any;
   ended: boolean;
-
   constructor(id: number, socket: Socket) {
     console.log("New connection", id);
 
@@ -38,21 +43,21 @@ class Connection {
 
     Connections[id] = this;
 
-    socket.on("data", async data => {
+    socket.on("data", async (data: Buffer | string) => {
       try {
         data = data.toString();
         this.buffer = this.buffer.concat(data);
         console.log("Buffer", this.buffer);
         let [arr, count] = countAndSlice(this.buffer);
         if (arr.length > count) {
-          this.buffer = arr.pop();
+          this.buffer = arr.pop() as string;
         } else {
           this.buffer = "";
         }
         this.queue.concat(arr);
 
         while (this.queue.length > 0) {
-          let op = this.queue.removeSync();
+          let op = this.queue.removeSync() as string;
           op = op.trim();
           if (op.length > 0) {
             try {
@@ -69,7 +74,7 @@ class Connection {
       }
     })
 
-    socket.on("error", (err) => {
+    socket.on("error", (err: SocketError) => {
       if (err.code === 'EPIPE') {
         console.log("Socket used after being closed. (Probably by client)");
         socket.end();
@@ -88,10 +93,10 @@ class Connection {
     });
   }
 
+  
   async execute(op: string) {
     if (secureOp.includes(op)) {
-      // $FlowFixMe
-      await this[op]();
+      await this[<secureOp>op]();
     } else {
       this.write("Unkown operator\n\r");
     }
@@ -165,9 +170,9 @@ class Connection {
 
 let id = 0;
 
-function connectionHandler(socket: Socket) {
+function connectionHandler(socket: Socket): void {
   id++;
   new Connection(id, socket);
 }
 
-module.exports = connectionHandler;
+export default connectionHandler;

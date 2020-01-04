@@ -1,6 +1,4 @@
-//@flow
-
-module.exports = function parseId(rawId: any): number {
+function parseId(rawId: string): number {
   let id: number = parseInt(rawId);
   if (isNaN(id)) {
     id = 1;
@@ -9,3 +7,4 @@ module.exports = function parseId(rawId: any): number {
   id = Math.trunc(id);
   return id;
 }
+export default parseId;
