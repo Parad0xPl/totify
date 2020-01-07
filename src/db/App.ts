@@ -25,9 +25,8 @@ App.init({
 }, {
   sequelize,
   hooks: {
-    afterCreate: (app, options) => {
+    beforeCreate: (app, options) => {
       let authCode = [
-        app.id,
         randomatic("A", 5),
         randomatic("0", 3),
         randomatic("Aa0", 20)
