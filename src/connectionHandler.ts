@@ -116,7 +116,7 @@ class Connection {
   async login() {
     const auth = await this.queue.remove();
     if (typeof this.session !== "undefined") {
-      this.write("error:session is logged;");
+      this.write("ERR;session is logged;");
       return;
     }
     const user = await db.App.findOne({
@@ -126,23 +126,24 @@ class Connection {
       }
     });
     if (!user) {
-      this.write("error:auth unmatched or not activated;");
+      this.write("ERR;auth unmatched or not activated;");
       return;
     }
     this.session = {
       user
     };
-    this.write("info:loggedin;");
+    this.write("OK;");
   }
 
   async notify() {
     const message = await this.queue.remove();
     if (typeof this.session === "undefined") {
-      this.write("error:need to be logged;");
+      this.write("ERR;need to be logged;");
       return;
     }
     let messageFormatted = `[${this.session.user.name}] - ${message}`;
     telegraf.send(messageFormatted);
+    this.write("OK;")
   }
 
   ping() {
