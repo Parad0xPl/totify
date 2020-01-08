@@ -70,6 +70,8 @@ if [ -e $NAPI-linux-node_sqlite3.node ]; then
 mv $NAPI-linux-node_sqlite3.node ../builds/linux/node_sqlite3.node
 fi
 
+cd ..
+
 # pkg \
 #   -t latest-linux-x64,latest-windows-x64,latest-mac-x64 \
 #   --out-path builds \
