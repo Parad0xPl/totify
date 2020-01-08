@@ -1,0 +1,11 @@
+[Unit]
+Description=Totify server
+Wants=basic.target
+
+[Service]
+Type=simple
+ExecStart=/home/totify/totify
+Restart=on-failure
+User=totify
+Group=totify
+Environment="TELEGRAM_TOKEN="
