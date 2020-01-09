@@ -1,0 +1,4 @@
+/app (id) - way of getting details
+/deleteApp (id) - delete activated app
+
+Support for client registred commands
