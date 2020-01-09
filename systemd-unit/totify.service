@@ -9,3 +9,6 @@ Restart=on-failure
 User=totify
 Group=totify
 Environment="TELEGRAM_TOKEN="
+
+[Install]
+WantedBy=multi-user.target
