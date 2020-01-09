@@ -3,6 +3,10 @@ import app from "./app";
 import telegraf from "../telegraf";
 import commandParts from 'telegraf-command-parts';
 
+/**
+ * Register telegraf commands and start telegraf bot
+ *
+ */
 function bot(): void {
   if(!telegraf.bot){
     throw new Error("Bot need to be initialized");

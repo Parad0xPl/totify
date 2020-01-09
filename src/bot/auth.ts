@@ -15,11 +15,16 @@ export interface Context extends ContextMessageUpdate{
     }
 }
 
+/**
+ * Register authentication commands
+ *
+ */
 function auth(): void {
   if (telegraf.bot == null) {
     throw new Error("Bot uninitialized");
   }
 
+  // Authentication middleware
   telegraf.bot.use(async (ctx: Context, next) => {
     try {
       if (!ctx.from) {
@@ -35,7 +40,6 @@ function auth(): void {
       });
 
       if (!!ctx.user) {
-        // Czemu tu było jakieś sprawdzenie kiedy ostatnio był aktualizowany profil :shrug:
         if (ctx.user.permanentBan || ctx.user.activated === false) {
           return;
         }
@@ -46,6 +50,7 @@ function auth(): void {
     }
   });
 
+  // Authenticate with code from authCode file
   cmdRegistry.register("auth", async (ctx: Context, next) => {
     try {
       if (!ctx.from || !ctx.state) {
@@ -85,6 +90,7 @@ function auth(): void {
     }
   });
 
+  // /auth should be the only supported command for not authorised account 
   telegraf.bot.use((ctx: Context, next) => {
     try {
       if (ctx.user && next) {
@@ -97,6 +103,7 @@ function auth(): void {
     }
   })
 
+  // Get current authCode
   cmdRegistry.register("getAuthCode", (ctx) => {
     try {
       ctx.reply(`Actual authentication code: ${authCode.get()}`);

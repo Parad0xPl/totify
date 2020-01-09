@@ -25,6 +25,11 @@ const secureOp = [
   "ping",
   "close"];
 
+/**
+ *Class representing connection with client
+ *
+ * @class Connection
+ */
 class Connection {
   id: number;
   socket: Socket;
@@ -32,6 +37,12 @@ class Connection {
   queue: Queue<string>;
   session: any;
   ended: boolean;
+  /**
+   * Creates an instance of Connection.
+   * @param {number} id - Conection's id
+   * @param {Socket} socket - Connection's socket
+   * @memberof Connection
+   */
   constructor(id: number, socket: Socket) {
     console.log("New connection", id);
 
@@ -94,6 +105,12 @@ class Connection {
   }
 
   
+  /**
+   * Execute operator by running corresponding method of Connection
+   *
+   * @param {string} op - operator
+   * @memberof Connection
+   */
   async execute(op: string) {
     if (secureOp.includes(op)) {
       await this[<secureOp>op]();
@@ -105,6 +122,13 @@ class Connection {
 
   // Session`s Operations
 
+  /**
+   * register new App with name from queue then reply with id and authcode
+   * 
+   * Should only be used by protocol
+   *
+   * @memberof Connection
+   */
   async register() {
     const name = await this.queue.remove();
     let instance = await db.App.create({
@@ -113,6 +137,14 @@ class Connection {
     this.write(`${instance.id}&${instance.auth};`);
   }
 
+  /**
+   * login App with authcode from queue. 
+   * Reply "OK" on success or "ERR" and message on error;
+   * 
+   * Should only be used by protocol
+   *
+   * @memberof Connection
+   */
   async login() {
     const auth = await this.queue.remove();
     if (typeof this.session !== "undefined") {
@@ -135,6 +167,14 @@ class Connection {
     this.write("OK;");
   }
 
+  /**
+   * send message from queue to telegraf bot.
+   * Reply "OK" on success or "ERR" and message on error;
+   * 
+   * Should only be used by protocol
+   *
+   * @memberof Connection
+   */
   async notify() {
     const message = await this.queue.remove();
     if (typeof this.session === "undefined") {
@@ -146,10 +186,24 @@ class Connection {
     this.write("OK;")
   }
 
+  /**
+   * Reply with "pong".
+   * 
+   * Should only be used by protocol
+   *
+   * @memberof Connection
+   */
   ping() {
     this.write("pong;");
   }
 
+  /**
+   * Close connection
+   * 
+   * Should only be used by protocol
+   *
+   * @memberof Connection
+   */
   close() {
     this.write("Closing connection;");
     this.socket.end();
@@ -157,12 +211,23 @@ class Connection {
 
   // Connection methods
 
+  /**
+   * Write message to connection's Socket
+   *
+   * @param {(string | Buffer)} input - Message
+   * @memberof Connection
+   */
   write(input: string | Buffer) {
     if (!this.socket.destroyed && !this.ended) {
       this.socket.write(input);
     }
   }
 
+  /**
+   * Clear connection from map
+   *
+   * @memberof Connection
+   */
   end() {
     delete Connections[id];
     console.log("Connection closed", this.id);
@@ -171,6 +236,11 @@ class Connection {
 
 let id = 0;
 
+/**
+ * Handle new connection with new Connection
+ *
+ * @param {Socket} socket
+ */
 function connectionHandler(socket: Socket): void {
   id++;
   new Connection(id, socket);

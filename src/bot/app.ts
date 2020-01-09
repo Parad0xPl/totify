@@ -11,6 +11,11 @@ const ie = _ie("bot/app");
 import parseId from "../utils/parseId";
 import { Context } from "./auth";
 
+/**
+ * Fetch 5 not activated apps and return buttons for user to activate or remove them
+ *
+ * @returns {Promise<CallbackButton[][]>} - Telegraf buttons
+ */
 async function fetchPendingApps(): Promise<CallbackButton[][]> {
   let pendingApps = await db.App.findAll({
     where: {
@@ -27,6 +32,12 @@ async function fetchPendingApps(): Promise<CallbackButton[][]> {
   return apps;
 }
 
+/**
+ * Get pending apps and wrap button with inlineKeyboard
+ *
+ * @param {*} [apps]
+ * @returns {Promise<object>} - Telegraf keyboard
+ */
 async function getPAppsKeyboard(apps?: any): Promise<object> {
   if (!apps) {
     apps = await fetchPendingApps();
@@ -36,6 +47,10 @@ async function getPAppsKeyboard(apps?: any): Promise<object> {
     .extra();
 }
 
+/**
+ * Register app related commands
+ *
+ */
 function app() {
   if (telegraf.bot == null) {
     throw new Error("Bot uninitialized");
@@ -79,6 +94,7 @@ function app() {
     }
   });
 
+  // List not activated apps
   cmdRegistry.register("pendingApps", async (ctx) => {
     try {
       let pendingApps = await fetchPendingApps();
@@ -92,6 +108,8 @@ function app() {
     }
   });
 
+  // Register an App with name passed by argument
+  // Return Name and authcode of new app instance
   cmdRegistry.register("registerApp", async (ctx: Context) => {
     try {
       if(!ctx.state){
@@ -116,6 +134,13 @@ function app() {
     }
   });
 
+  /**
+   * Return list of apps paginated
+   *
+   * @param {number} page
+   * @param {Context} ctx
+   * @returns {Promise<[string, object]>}
+   */
   async function printAppsList(page: number, ctx: Context): Promise<[string, object]> {
     let apps = await db.App.findAndCountAll({
       limit: 5,
@@ -144,6 +169,7 @@ function app() {
     return [msg, Markup.inlineKeyboard(keyboard).extra()];
   }
 
+  // Return list of apps
   cmdRegistry.register("apps", async (ctx: Context) => {
     try {
       if(!ctx.state){
@@ -157,6 +183,7 @@ function app() {
     }
   });
 
+  // Pagination support for list
   telegraf.bot.action(/^apps (\d+)$/, async (ctx) => {
     try {
       if(!ctx.match){

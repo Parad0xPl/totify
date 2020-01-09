@@ -5,6 +5,11 @@ const telegraf: {
   [propname: string]: any,
   bot?: Telegraf<ContextMessageUpdate>
 } = {
+  /**
+   * Return authenticated chats
+   *
+   * @returns {Promise<number[]>} - Array of chats` ID
+   */
   async chats(): Promise<number[]> {
     let a = await db.User.findAll({
       where: {
@@ -15,6 +20,12 @@ const telegraf: {
     let ids = a.map(el => el.userTelegramId);
     return ids;
   },
+  /**
+   * Send message to all authenticated chats
+   *
+   * @param {string} message - Message to send
+   * @returns {Promise<void>}
+   */
   async send(message: string): Promise<void> {
     if(!this.bot){
       throw new Error("Can't send when telegraf is not initialized");
@@ -25,6 +36,11 @@ const telegraf: {
     }
   },
   bot: undefined,
+  /**
+   * Initilize Telegraf with TELEGRAM_TOKEN
+   *
+   * @returns {Promise<void>}
+   */
   async init(): Promise<void> {
     if (typeof process.env.TELEGRAM_TOKEN === "undefined") {
       throw new Error("Telegram token not found");

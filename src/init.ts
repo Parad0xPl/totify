@@ -1,6 +1,11 @@
 import db from "./db";
 import bot from "./telegraf";
 
+/**
+ * Initialization step
+ *
+ * @returns {Promise<void>}
+ */
 async function init(): Promise<void> {
   try {
     await db.sequelize.sync();
