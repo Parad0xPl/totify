@@ -28,7 +28,7 @@ const telegraf: {
    */
   async send(message: string): Promise<void> {
     if(!this.bot){
-      throw new Error("Can't send when telegraf is not initialized");
+      throw new Error("Can't send message if telegraf is not initialized");
     }
     let chats = await this.chats();
     for (let id of chats) {

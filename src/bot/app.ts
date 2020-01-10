@@ -1,9 +1,8 @@
-import moment from "moment";
 import _debug from "debug";
 import {Markup, CallbackButton} from "telegraf";
 const debug = _debug("totify:bot/app");
 
-import cmdRegistry from "../commandRegistry";
+import cmdRegister from "../commandRegister";
 import telegraf from "../telegraf";
 import db from "../db";
 import _ie from "../utils/internalError";
@@ -95,7 +94,7 @@ function app() {
   });
 
   // List not activated apps
-  cmdRegistry.register("pendingApps", async (ctx) => {
+  cmdRegister.register("pendingApps", async (ctx) => {
     try {
       let pendingApps = await fetchPendingApps();
       if (pendingApps.length <= 0) {
@@ -110,7 +109,7 @@ function app() {
 
   // Register an App with name passed by argument
   // Return Name and authcode of new app instance
-  cmdRegistry.register("registerApp", async (ctx: Context) => {
+  cmdRegister.register("registerApp", async (ctx: Context) => {
     try {
       if(!ctx.state){
         throw new Error("There is no state attribute");
@@ -170,7 +169,7 @@ function app() {
   }
 
   // Return list of apps
-  cmdRegistry.register("apps", async (ctx: Context) => {
+  cmdRegister.register("apps", async (ctx: Context) => {
     try {
       if(!ctx.state){
         throw new Error("There is no state attribute");

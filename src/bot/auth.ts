@@ -1,4 +1,4 @@
-import cmdRegistry from "../commandRegistry";
+import cmdRegister from "../commandRegister";
 import telegraf from "../telegraf";
 import db from "../db";
 import authCode from "../authCode";
@@ -40,7 +40,7 @@ function auth(): void {
       });
 
       if (!!ctx.user) {
-        if (ctx.user.permanentBan || ctx.user.activated === false) {
+        if (ctx.user.permanentBan || ctx.user.isAuthenticated === false) {
           return;
         }
       }
@@ -51,12 +51,12 @@ function auth(): void {
   });
 
   // Authenticate with code from authCode file
-  cmdRegistry.register("auth", async (ctx: Context, next) => {
+  cmdRegister.register("auth", async (ctx: Context, next) => {
     try {
       if (!ctx.from || !ctx.state) {
         throw new Error("There is no from attribute");
       }
-      if (ctx.user && ctx.user.activated == true) {
+      if (ctx.user && ctx.user.isAuthenticated == true) {
         ctx.reply("Already authorised");
         return
       }
@@ -104,7 +104,7 @@ function auth(): void {
   })
 
   // Get current authCode
-  cmdRegistry.register("getAuthCode", (ctx) => {
+  cmdRegister.register("getAuthCode", (ctx) => {
     try {
       ctx.reply(`Actual authentication code: ${authCode.get()}`);
     } catch (e) {

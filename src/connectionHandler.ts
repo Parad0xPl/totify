@@ -106,16 +106,16 @@ class Connection {
 
   
   /**
-   * Execute operator by running corresponding method of Connection
+   * Execute operation by running corresponding method of Connection
    *
-   * @param {string} op - operator
+   * @param {string} op - operation
    * @memberof Connection
    */
   async execute(op: string) {
     if (secureOp.includes(op)) {
       await this[<secureOp>op]();
     } else {
-      this.write("Unkown operator\n\r");
+      this.write("Unkown operation\n\r");
     }
 
   }

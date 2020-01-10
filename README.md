@@ -2,24 +2,24 @@
 
 Simple communication bridge between clients and telegram. Using sockets is simple way for other clients to send notification. Current version support only one way communication (from client to telegram) but it should be possible to implement registering command. Protocol is based on queue where elements are separated with semicolons. 
 
-## Protocol's Operators
+## Protocol Operations
 
-### register
+### register (name)
 Reply with "\<id\>&\<auth\>"
 
 ```
-register;
+register;Test App;
 ```
 
 ### login (authcode)
-Reply with OK on success or ERR with message;
+Reply with "OK" on success or "ERR" with message;
 ```
 login;PIZS-4681-bKUp-2154;
 ```
 
 ### notify (msg)
 Need authentication
-Reply with OK on success or ERR with message;
+Reply with "OK" on success or "ERR" with message;
 ```
 notify; test notification;
 ```
@@ -31,14 +31,14 @@ ping;
 ```
 
 ### close
-Reply with closing message and close server connection
+Reply with closing message and close connection
 ```
 close;
 ```
 
-## Sample Comunication
+## Communication Sample
 ```
-Server in: register;close;
+Server in: register;Test App;close;
 Server out: 5&GSFBT-665-oJDDKqerYCWwfmtFWOOD;
 ```
 

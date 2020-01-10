@@ -9,22 +9,22 @@ import chalk from "chalk";
 import _debug from "debug";
 const debug = _debug("totify:main");
 
-import socketPathCon from "./utils/socketPath";
+import getSocketPath from "./utils/socketPath";
 import connectionHandler from "./connectionHandler";
 import init from "./init";
 import prepareBot from "./bot";
 
 const server = net.createServer(connectionHandler);
 
-const socketPath = socketPathCon(process.env.TOTIFY_INSTANCENAME);
+const socketPath = getSocketPath(process.env.TOTIFY_INSTANCENAME);
 
 //Main
 
 (async () => {
 
-  debug("Starting awaited init");
+  debug("Initializing");
   await init();
-  debug("Initializing done")
+  debug("Initialization done")
 
   debug("Preparing bot");
   prepareBot();
