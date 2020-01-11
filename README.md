@@ -2,6 +2,19 @@
 
 Simple communication bridge between clients and telegram. Using sockets is simple way for other clients to send notification. Current version support only one way communication (from client to telegram) but it should be possible to implement registering command. Protocol is based on queue where elements are separated with semicolons. 
 
+## Build
+
+```
+npm install
+npm run build
+```
+
+## Start
+
+```
+npm start
+```
+
 ## Protocol Operations
 
 ### register (name)
