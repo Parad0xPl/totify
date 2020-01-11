@@ -126,7 +126,7 @@ function app() {
       });
       ctx.reply(`App registered\n` +
         `Name: ${instance.name}\n` +
-        `Auth: ${instance.auth}`);
+        `Auth: ${instance.authCode}`);
       return;
     } catch (e) {
       ie(4, e);
@@ -155,7 +155,7 @@ function app() {
       return {
         i: el.id,
         n: el.name,
-        a: (el.activated ? "Activated" : "Not activated")
+        a: (el.isActivated ? "Activated" : "Not activated")
       }
     }).map(el => `[${el.i}](${el.n})\t${el.a}\n`).join("");
     const keyboard = [];

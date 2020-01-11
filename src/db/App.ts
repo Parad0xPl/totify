@@ -5,21 +5,24 @@ import randomatic from "randomatic";
 class App extends Model {
   id!: number;
   name!: string;
-  auth!: string;
-  activated!: boolean;
+  authCode!: string;
+  isActivated!: boolean;
 }
 
 App.init({
   name: {
-    type: Sequelize.STRING
-  },
-  auth: {
     type: Sequelize.STRING,
+    field: "name"
+  },
+  authCode: {
+    type: Sequelize.STRING,
+    field: "auth",
     defaultValue: "",
     unique: true
   },
-  activated: {
+  isActivated: {
     type: Sequelize.BOOLEAN,
+    field: "activated",
     defaultValue: false
   }
 }, {
@@ -31,7 +34,7 @@ App.init({
         randomatic("0", 3),
         randomatic("Aa0", 20)
       ].join("-");
-      app.auth = authCode;
+      app.authCode = authCode;
     }
   }
 });

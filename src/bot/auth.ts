@@ -40,7 +40,7 @@ function auth(): void {
       });
 
       if (!!ctx.user) {
-        if (ctx.user.permanentBan || ctx.user.isAuthenticated === false) {
+        if (ctx.user.isPermanentlyBanned || ctx.user.isAuthenticated === false) {
           return;
         }
       }

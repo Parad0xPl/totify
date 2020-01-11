@@ -4,7 +4,7 @@ import Sequelize, { Model } from "sequelize";
 class User extends Model {
   userTelegramId!: number;
   isAuthenticated!: boolean;
-  permanentBan!: boolean;
+  isPermanentlyBanned!: boolean;
   
   public readonly updatedAt!: Date;
 
@@ -16,11 +16,12 @@ User.init({
   },
   isAuthenticated: {
     type: Sequelize.BOOLEAN,
-    defaultValue: false,
-    field: "activated"
+    field: "activated",
+    defaultValue: false
   },
-  permanentBan: {
+  isPermanentlyBanned: {
     type: Sequelize.BOOLEAN,
+    field: "permanentBan",
     defaultValue: false
   }
 }, {
