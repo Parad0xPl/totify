@@ -67,7 +67,7 @@ function app() {
         throw new Error(`There is no app with id equeal ${id}`);
       }
       await app.update({
-        activated: true
+        isActivated: true
       })
       ctx.editMessageText(`[${app.name}] Activated`, await getPAppsKeyboard());
     } catch (e) {
@@ -115,6 +115,10 @@ function app() {
         throw new Error("There is no state attribute");
       }
       const args: string = await ctx.state.command.args;
+      if (args.length <= 0) {
+        ctx.reply("You need to spiecifie name");
+        return;
+      }
       if (args.length > 25) {
         ctx.reply("Name to long!");
         return;
@@ -122,7 +126,7 @@ function app() {
       const appName = args;
       const instance = await db.App.create({
         name: appName,
-        activated: true
+        isActivated: true
       });
       ctx.reply(`App registered\n` +
         `Name: ${instance.name}\n` +

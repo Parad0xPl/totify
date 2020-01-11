@@ -65,14 +65,14 @@ function auth(): void {
       if (args === actualAuthCode) {
         if (ctx.user) {
           await ctx.user.update({
-            activated: true
+            isAuthenticated: true
           });
         } else {
           let user = await db.User.findOrCreate({
             where: {
               userTelegramId: ctx.from.id
             }, defaults: {
-              activated: true
+              isAuthenticated: true
             }
           });
         }
@@ -81,7 +81,7 @@ function auth(): void {
       } else {
         let user = await db.User.create({
           userTelegramId: ctx.from.id,
-          activated: false
+          isAuthenticated: false
         });
         ctx.reply("Wrong authentication code. Will be banned for 24H")
       }
